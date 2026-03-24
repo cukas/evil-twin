@@ -172,14 +172,33 @@ done
 echo ""
 
 # --------------------------------------------------
-# 7. hooks.json is empty (no hooks by design)
+# 7. Hooks
 # --------------------------------------------------
 echo "## Hooks"
 
-HOOKS_COUNT=$(jq '.hooks | length' "$PLUGIN_ROOT/hooks/hooks.json")
-[ "$HOOKS_COUNT" = "0" ] \
-  && pass "hooks.json has zero hooks (by design)" \
-  || fail "hooks.json" "expected 0 hooks, got $HOOKS_COUNT"
+jq -e '.hooks.SessionStart' "$PLUGIN_ROOT/hooks/hooks.json" >/dev/null 2>&1 \
+  && pass "hooks.json defines SessionStart hook" \
+  || fail "hooks.json" "missing SessionStart hook"
+
+[ -f "$PLUGIN_ROOT/hooks/session-start.sh" ] \
+  && pass "session-start.sh exists" \
+  || fail "session-start.sh exists" "missing"
+
+[ -x "$PLUGIN_ROOT/hooks/session-start.sh" ] \
+  && pass "session-start.sh is executable" \
+  || fail "session-start.sh is executable" "not executable"
+
+bash -n "$PLUGIN_ROOT/hooks/session-start.sh" 2>/dev/null \
+  && pass "session-start.sh has valid syntax" \
+  || fail "session-start.sh syntax" "parse error"
+
+grep -q "confidence" "$PLUGIN_ROOT/hooks/session-start.sh" \
+  && pass "session-start.sh injects confidence rule" \
+  || fail "session-start.sh" "missing confidence injection"
+
+grep -q "evil-twin" "$PLUGIN_ROOT/hooks/session-start.sh" \
+  && pass "session-start.sh references /evil-twin" \
+  || fail "session-start.sh" "missing /evil-twin reference"
 
 echo ""
 

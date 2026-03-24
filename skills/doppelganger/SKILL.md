@@ -195,20 +195,33 @@ Produce the structured comparison report:
 
 [One of:]
 - **HIGH CONVERGENCE (7-10):** Independent verification successful. High confidence in the approach.
-- **MODERATE CONVERGENCE (4-6):** Key decisions diverged. Review the divergence points before proceeding.
-- **LOW CONVERGENCE (0-3):** Fundamentally different approaches. Escalate to `/tribunal` or discuss with user.
+- **MODERATE CONVERGENCE (4-6):** Key decisions diverged. Merge the best parts from both.
+- **LOW CONVERGENCE (0-3):** Fundamentally different approaches. Merge what's clearly better from each, escalate the rest to user or `/tribunal`.
 
-### Recommended Action
-[What to do — merge primary as-is, adopt Doppelganger's approach for X, cherry-pick specific decisions, or escalate]
+### Merge Plan — Best of Both
+
+Do NOT just pick one approach. For EVERY divergence point and every "only" finding, decide what to keep:
+
+| Area | Take from | Why | Action |
+|------|-----------|-----|--------|
+| [e.g., auth middleware] | Primary | [converged — both did the same] | Keep as-is |
+| [e.g., caching] | Doppelganger | [LRU cache is better than no cache] | Cherry-pick from worktree |
+| [e.g., error handling] | Both | [primary's structure + doppelganger's edge case] | Merge manually |
+| [e.g., extra validation] | Neither | [over-engineering, not needed] | Skip |
+
+After building the merge plan, **implement it**: apply the Doppelganger's best parts into the primary's code. Use `git diff` against the worktree branch to extract specific hunks. The goal is one merged result that's better than either alone.
 ```
 
-### Step 5: Worktree Cleanup
+### Step 5: Apply Merge
 
-If the Agent tool returned a worktree path and branch:
+This is where the value is. Don't just report — act on it.
 
-- If verdict is HIGH CONVERGENCE → the worktree can be cleaned up (the Agent tool handles this automatically if no changes are kept)
-- If there are useful Doppelganger changes to cherry-pick → inform the user of the worktree branch name so they can `git cherry-pick` or `git diff` manually
-- State the worktree branch name in the report for reference
+1. For each "Take from: Doppelganger" row — cherry-pick or manually apply the change into the primary branch
+2. For each "Take from: Both" row — combine the best elements from both
+3. Run build + tests after merging to verify nothing broke
+4. If the worktree branch has useful changes left, inform the user of the branch name for reference
+
+**Important:** The Doppelganger's worktree branch is preserved until you're done merging. State the branch name in the report so the user can inspect it.
 
 ---
 
