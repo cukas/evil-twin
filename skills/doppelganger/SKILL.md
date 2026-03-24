@@ -47,15 +47,22 @@ Before anything else, clearly separate PROBLEM from SOLUTION.
 
 **Critical rule:** The Doppelganger must NEVER see your approach. Only the problem statement.
 
-### Step 1: Gather Context for the Doppelganger
+### Step 1: Auto-detect Project Context
 
-Before spawning, prepare a clean context package. Read the relevant files from the CURRENT state and collect:
+Run the project detection script to get language, build/test commands, and file tree in one shot:
 
+```bash
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/detect-project.sh" "$(pwd)"
+```
+
+This returns JSON with: `language`, `build_cmd`, `test_cmd`, `file_tree`, `entry_points`, `dirty_files`, `git_branch`.
+
+Use the output to populate the Doppelganger prompt. The `dirty_files` list tells you which files the primary has modified — the worktree will have the pre-modification versions.
+
+Additionally, prepare:
 1. **Problem statement** — the user's original request, stripped of any solution discussion
-2. **File tree** — run `find . -type f -name "*.{ts,js,py,rs,go}" | head -60` or equivalent for the project's language
-3. **Key files** — files that provide context for understanding the problem (NOT files you already modified). If you already modified files, note them — the worktree will have the pre-modification version.
-4. **Constraints** — test commands (`npm test`, `pytest`, etc.), build commands, lint rules, style conventions
-5. **Assumptions log** — if the problem is ambiguous, list what assumptions YOU made. The Doppelganger will make its own — the divergence in assumptions is part of the comparison.
+2. **Key files** — files that provide context for understanding the problem (NOT files listed in `dirty_files`)
+3. **Assumptions log** — if the problem is ambiguous, list what assumptions YOU made. The Doppelganger will make its own — the divergence in assumptions is part of the comparison.
 
 ### Step 2: Spawn the Doppelganger
 
@@ -122,17 +129,30 @@ CONSTRAINTS:
 
 ### Step 3: Leakage Check
 
-After the Doppelganger returns, perform a quick contamination check:
+If the Agent returned a worktree branch name, run the programmatic leakage detector:
 
-1. Did the Doppelganger reference any variable/function names that ONLY exist in your solution?
-2. Did it mention your approach or explicitly reference having seen a prior solution?
-3. Did it modify the exact same lines you did in a non-obvious way? (Some convergence is expected — but identical line-for-line changes on non-obvious code may indicate leakage)
+```bash
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/leakage-check.sh" "$(git branch --show-current)" "<doppelganger_branch>" "HEAD"
+```
 
-If contamination is suspected:
+This returns JSON with:
+- `status`: `clean` / `warning` / `contaminated`
+- `file_overlap`: how many files both modified
+- `identical_hunks`: non-trivial identical code lines
+- `warnings`: specific leakage signals (suspicious file overlap, identical code, name collisions)
+
+**Interpret the result:**
+- `clean` → proceed to comparison with full confidence
+- `warning` → note the warnings in the report but proceed
+- `contaminated` → flag prominently:
 
 ```markdown
-**Leakage Warning:** Doppelganger may have been contaminated. [reason]. Results should be treated as review, not independent verification.
+**Leakage Warning:** Doppelganger may have been contaminated. [warnings from script]. Results should be treated as review, not independent verification.
 ```
+
+If the Agent did NOT return a branch (e.g., worktree was auto-cleaned), fall back to manual check:
+1. Did the Doppelganger reference variable/function names that ONLY exist in your solution?
+2. Did it modify the exact same non-obvious lines you did?
 
 ### Step 4: Comparison
 

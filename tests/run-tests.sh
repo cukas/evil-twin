@@ -238,7 +238,64 @@ rm -rf "$EVIL_TWIN_CONFIG_DIR"
 echo ""
 
 # --------------------------------------------------
-# 10. Doppelganger structure
+# 10. Scripts
+# --------------------------------------------------
+echo "## Scripts"
+
+[ -f "$PLUGIN_ROOT/scripts/detect-project.sh" ] \
+  && pass "detect-project.sh exists" \
+  || fail "detect-project.sh exists" "missing"
+
+[ -x "$PLUGIN_ROOT/scripts/detect-project.sh" ] \
+  && pass "detect-project.sh is executable" \
+  || fail "detect-project.sh is executable" "not executable"
+
+bash -n "$PLUGIN_ROOT/scripts/detect-project.sh" 2>/dev/null \
+  && pass "detect-project.sh has valid syntax" \
+  || fail "detect-project.sh syntax" "parse error"
+
+[ -f "$PLUGIN_ROOT/scripts/leakage-check.sh" ] \
+  && pass "leakage-check.sh exists" \
+  || fail "leakage-check.sh exists" "missing"
+
+[ -x "$PLUGIN_ROOT/scripts/leakage-check.sh" ] \
+  && pass "leakage-check.sh is executable" \
+  || fail "leakage-check.sh is executable" "not executable"
+
+bash -n "$PLUGIN_ROOT/scripts/leakage-check.sh" 2>/dev/null \
+  && pass "leakage-check.sh has valid syntax" \
+  || fail "leakage-check.sh syntax" "parse error"
+
+# Functional test: detect-project against this repo
+DETECT_OUTPUT=$(bash "$PLUGIN_ROOT/scripts/detect-project.sh" "$PLUGIN_ROOT" 2>/dev/null)
+echo "$DETECT_OUTPUT" | jq empty 2>/dev/null \
+  && pass "detect-project.sh outputs valid JSON" \
+  || fail "detect-project.sh JSON" "invalid output"
+
+echo "$DETECT_OUTPUT" | jq -e '.language' >/dev/null 2>&1 \
+  && pass "detect-project.sh includes language field" \
+  || fail "detect-project.sh" "missing language"
+
+echo "$DETECT_OUTPUT" | jq -e '.build_cmd' >/dev/null 2>&1 \
+  && pass "detect-project.sh includes build_cmd field" \
+  || fail "detect-project.sh" "missing build_cmd"
+
+echo "$DETECT_OUTPUT" | jq -e '.test_cmd' >/dev/null 2>&1 \
+  && pass "detect-project.sh includes test_cmd field" \
+  || fail "detect-project.sh" "missing test_cmd"
+
+echo "$DETECT_OUTPUT" | jq -e '.file_tree' >/dev/null 2>&1 \
+  && pass "detect-project.sh includes file_tree field" \
+  || fail "detect-project.sh" "missing file_tree"
+
+echo "$DETECT_OUTPUT" | jq -e '.git_branch' >/dev/null 2>&1 \
+  && pass "detect-project.sh includes git_branch field" \
+  || fail "detect-project.sh" "missing git_branch"
+
+echo ""
+
+# --------------------------------------------------
+# 11. Doppelganger structure
 # --------------------------------------------------
 echo "## Doppelganger Structure"
 
