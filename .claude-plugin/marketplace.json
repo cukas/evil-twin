@@ -1,0 +1,22 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "cukas",
+  "description": "Your shadow self — adversarial challenge + independent blind verification. Claude-only.",
+  "owner": {
+    "name": "cukas"
+  },
+  "plugins": [
+    {
+      "name": "evil-twin",
+      "description": "Your shadow self. Evil Twin attacks your reasoning. Doppelganger solves blind and compares. Claude-only, no external AI keys needed.",
+      "version": "1.0.0",
+      "author": {
+        "name": "cukas"
+      },
+      "source": "./",
+      "category": "development",
+      "homepage": "https://github.com/cukas/evil-twin",
+      "tags": ["adversarial", "confidence", "self-review", "challenge", "quality", "reasoning"]
+    }
+  ]
+}

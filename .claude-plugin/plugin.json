@@ -1,0 +1,12 @@
+{
+  "name": "evil-twin",
+  "description": "Your shadow self — adversarial challenge + independent blind verification. Claude-only.",
+  "version": "1.0.0",
+  "author": {
+    "name": "cukas"
+  },
+  "homepage": "https://github.com/cukas/evil-twin",
+  "repository": "https://github.com/cukas/evil-twin",
+  "license": "MIT",
+  "keywords": ["adversarial", "confidence", "self-review", "challenge", "quality", "reasoning"]
+}
