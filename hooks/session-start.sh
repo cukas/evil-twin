@@ -47,7 +47,7 @@ _register_doppelganger_buddy() {
     --display "Doppelganger (Evil Twin)" \
     --modes "exec" \
     --timeout "360" \
-    --install-hint "Install evil-twin plugin: claude plugin install cukas/evil-twin" \
+    --install-hint "Install evil-twin plugin: claude plugin install evil-twin@cukas" \
     >/dev/null 2>&1 || {
       evil_twin_debug "session-start: doppelganger buddy registration failed"
       return 0

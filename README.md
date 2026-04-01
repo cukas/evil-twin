@@ -16,8 +16,8 @@ Works standalone with just Claude. Connects into [AI Buddies](https://github.com
 ## Install
 
 ```bash
-claude plugin marketplace add cukas-evil-twin --source github --repo cukas/evil-twin
-claude plugin install evil-twin@cukas-evil-twin
+claude plugin marketplace add cukas/evil-twin
+claude plugin install evil-twin@cukas
 ```
 
 If you have [AI Buddies](https://github.com/cukas/claudes-ai-buddies) installed, Doppelganger auto-registers as a forge competitor on session start.
